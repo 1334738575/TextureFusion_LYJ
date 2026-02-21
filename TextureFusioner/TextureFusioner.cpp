@@ -1,5 +1,5 @@
 #include "TextureFusioner.h"
-
+#include <common/Timer.h>
 #include <IO/ColmapIO.h>
 
 
@@ -19,6 +19,7 @@ namespace TextureFusion_LYJ
         TextureFusionOption _opt
     )
     {
+        SLAM_LYJ::Timer t;
         int fSz = _btm.getFn();
 
         //select image
@@ -33,6 +34,9 @@ namespace TextureFusion_LYJ
             std::cout << "select image error!" << std::endl;
             return;
         }
+        double selcetImageTime = t.elapsed(true);
+        std::cout << "select images time: " << selcetImageTime << "ms" << std::endl;
+
 
         //select texture
         int selectedSz = imgInds.size();
@@ -54,6 +58,8 @@ namespace TextureFusion_LYJ
         std::vector<int> fs2Tex;//imgid is after select order
         TextureSelector texSelector;
         texSelector.selectTexture(_btm, selectedImgs, selectedTcws, selectedCams, selectedImgs2fs, fs2Tex, texSelectorOpt);
+        double selcetTextureTime = t.elapsed(true);
+        std::cout << "select texture time: " << selcetTextureTime << "ms" << std::endl;
         
         //block, maybe remove after
         TextureBlock defaultBlock;
@@ -80,7 +86,9 @@ namespace TextureFusion_LYJ
             if(fs2bs[i] == 0)
                 texBlocks[0].fids.push_back(i);
         }
-
+        double generateBlockTime = t.elapsed(true);
+        std::cout << "generate block time: " << generateBlockTime << "ms" << std::endl;
+        
         //obj
         std::vector<Eigen::Vector2f> uvs;
         std::vector<SLAM_LYJ::BaseTriTextureUV> triUVs;
@@ -105,7 +113,7 @@ namespace TextureFusion_LYJ
             totalH += texBlocks[i].h;
         }
         int priorOutH = sqrt(selectedSz) * maxH;
-        std::cout << "prior out H: " << priorOutH << std::endl;
+        //std::cout << "prior out H: " << priorOutH << std::endl;
         int curC=0;
         int curR=0;
         int outW = 0;
@@ -146,7 +154,9 @@ namespace TextureFusion_LYJ
             mmm.copyTo(finalMat(rectDst));
         }
         comImg.compressCVMat(finalMat);
-        cv::imwrite("D:/tmp/tf.jpg", finalMat);
+        //cv::imwrite("D:/tmp/tf.jpg", finalMat);
+        double generateImageTime = t.elapsed(true);
+        std::cout << "generate image time: " << generateImageTime << "ms" << std::endl;
 
         //uvs, simple
         const auto& ps = _btm.getVertexs();
@@ -188,7 +198,9 @@ namespace TextureFusion_LYJ
                 triUVs[i].uvId_[j] = ii + j;
             }
         }
-
+        double generateUVTime = t.elapsed(true);
+        std::cout << "generate UV time: " << generateUVTime << "ms" << std::endl;
+        
         //TODO
         _btm.enableTexture();
         _btm.setTexture(uvs, triUVs, comImg);

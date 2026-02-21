@@ -36,6 +36,7 @@ endif()
 if(MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
+option(USE_SQLITE3 CACHE ON)
 option(USE_CONAN "use conan" OFF)
 
 set(${PROJECT_NAME}_LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/output)

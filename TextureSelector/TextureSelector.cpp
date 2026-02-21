@@ -32,24 +32,44 @@ namespace TextureFusion_LYJ
 
         _fs2Tex.assign(fSz, -1);
         std::map<double, int> overlaps;
+        std::vector<double> overlapsV(imgSz, 0);
         SLAM_LYJ::BitFlagVec fVisible(fSz);
         std::set<int> selectedImgInds;
+        auto functtt = [&](uint64_t _s, uint64_t _e, uint32_t _id)
+            {
+                for (int i = _s; i < _e; ++i)
+                {
+                    if (selectedImgInds.count(i))
+                        continue;
+                    int cnt = 0;
+                    for (size_t j = 0; j < fSz; ++j)
+                    {
+                        /* code */
+                        if (!fVisible[j] && _imgs2fs[i][j])
+                            ++cnt;
+                    }
+                    overlapsV[i] = double(cnt) / double(fSz);
+                }
+            };
         auto funcFindNext = [&]()->int
         {
             overlaps.clear();
+            overlapsV.assign(imgSz, 0);
             const auto& dPtr = fVisible.data();
-            for(int i=0;i<imgSz;++i)
+
+            if (opt_.threadNum != 1)
             {
-                if(selectedImgInds.count(i))
+                SLAM_LYJ::SLAM_LYJ_MATH::ThreadPool threadPool(opt_.threadNum);
+                threadPool.processWithId(functtt, 0, imgSz);
+            }
+            else
+                functtt(0, imgSz, 0);
+
+            for (int i = 0; i < imgSz; ++i)
+            {
+                if (overlapsV[i] == 0)
                     continue;
-                int cnt = 0;
-                for (size_t j = 0; j < fSz; ++j)
-                {
-                    /* code */
-                    if(!fVisible[j] && _imgs2fs[i][j])
-                        ++cnt;
-                }
-                overlaps[double(cnt)/double(fSz)] = i;
+                overlaps[overlapsV[i]] = i;
             }
             if(overlaps.empty() || (overlaps.rbegin()->first <= 0))
                 return -1;

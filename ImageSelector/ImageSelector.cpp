@@ -68,18 +68,19 @@ namespace TextureFusion_LYJ
         for(int i=0;i< threadNum;++i)
             proCaches[i].init(btm_->getVn(), btm_->getFn(), w, h);
         proBuffers.resize(threadNum);
-        for(int i=0;i< threadNum;++i)
-            proBuffers[i].init(w, h, btm_);
+        for (int i = 0; i < threadNum; ++i)
+            //proBuffers[i].init(w, h, btm_);
+            proBuffers[i].init(w, h, btm_, 0.01, FLT_MAX, -0.2);
 
         //project
         auto funcProject = [&](uint64_t _s, uint64_t _e, uint32_t _id) {
             for (int i = _s; i < _e; ++i)
             {
-                SLAM_LYJ::Timer q;
+                //SLAM_LYJ::Timer q;
                 proBuffers[_id].updateTcw(Tcws_[i]);
                 CUDA_LYJ::project(proHandle_, proCaches[_id], proBuffers[_id].Tcw.data(), (float*)proBuffers[_id].depthsM.data, proBuffers[_id].fIds.data(), proBuffers[_id].allVisiblePIds.data(), proBuffers[_id].allVisibleFIds.data(), proBuffers[_id].minD, proBuffers[_id].maxD, proBuffers[_id].csTh, proBuffers[_id].detDTh);
-                double t = q.elapsed();
-                std::cout << "cost time: " << t << " ms" << std::endl;
+                //double t = q.elapsed();
+                //std::cout << "cost time: " << t << " ms" << std::endl;
                 for (int j = 0; j < fSz; ++j)
                 {
                     const auto& vIds = faces[j].vId_;
@@ -94,23 +95,23 @@ namespace TextureFusion_LYJ
 
                 if(false)
                 {
-                cv::Mat depthsShow(h, w, CV_8UC1);
-                depthsShow.setTo(0);
-                for (int r = 0; r < h; ++r)
-                {
-                	for (int c = 0; c < w; ++c)
-                	{
-                		float d = proBuffers[_id].depthsM.at<float>(r, c);
-                		if (d == FLT_MAX)
-                			continue;
-                		int di = d * 10;
-                		depthsShow.at<uchar>(r, c) = (uchar)di;
-                	}
-                }
-                cv::pyrDown(depthsShow, depthsShow);
-                cv::pyrDown(depthsShow, depthsShow);
-                cv::imshow("depth", depthsShow);
-                cv::waitKey();
+                    cv::Mat depthsShow(h, w, CV_8UC1);
+                    depthsShow.setTo(0);
+                    for (int r = 0; r < h; ++r)
+                    {
+                	    for (int c = 0; c < w; ++c)
+                	    {
+                		    float d = proBuffers[_id].depthsM.at<float>(r, c);
+                		    if (d == FLT_MAX)
+                			    continue;
+                		    int di = d * 10;
+                		    depthsShow.at<uchar>(r, c) = (uchar)di;
+                	    }
+                    }
+                    cv::pyrDown(depthsShow, depthsShow);
+                    cv::pyrDown(depthsShow, depthsShow);
+                    cv::imshow("depth", depthsShow);
+                    cv::waitKey();
                 }
 
             }
@@ -132,29 +133,49 @@ namespace TextureFusion_LYJ
         int fSz = btm_->getFn();
 
         std::map<double, int> overlaps;
+        std::vector<double> overlapsV(imgSz, 0);
         SLAM_LYJ::BitFlagVec fVisible(fSz);
         int dSz = fVisible.size();
         dSz >>= 3;
         dSz += 1;
         std::set<int> selectedImgInds;
+        auto functtt = [&](uint64_t _s, uint64_t _e, uint32_t _id)
+            {
+                for (int i = _s; i < _e; ++i)
+                {
+                    if (selectedImgInds.count(i))
+                        continue;
+                    int cnt = 0;
+                    for (size_t j = 0; j < fSz; ++j)
+                    {
+                        /* code */
+                        if (!fVisible[j] && _imgs2fs[i][j])
+                            ++cnt;
+                    }
+                    overlapsV[i] = double(cnt) / double(fSz);
+                }
+            };
         auto funcFindNext = [&]()->int
         {
             overlaps.clear();
+            overlapsV.assign(imgSz, 0);
             const auto& dPtr = fVisible.data();
-            for(int i=0;i<imgSz;++i)
+
+            if (opt_.threadNum != 1)
             {
-                if(selectedImgInds.count(i))
-                    continue;
-                int cnt = 0;
-                for (size_t j = 0; j < fSz; ++j)
-                {
-                    /* code */
-                    if(!fVisible[j] && _imgs2fs[i][j])
-                        ++cnt;
-                }
-                overlaps[double(cnt)/double(fSz)] = i;
+                SLAM_LYJ::SLAM_LYJ_MATH::ThreadPool threadPool(opt_.threadNum);
+                threadPool.processWithId(functtt, 0, imgSz);
             }
-            if(overlaps.empty())
+            else
+                functtt(0, imgSz, 0);
+
+            for (int i = 0; i < imgSz; ++i)
+            {
+                if (overlapsV[i] == 0)
+                    continue;
+                overlaps[overlapsV[i]] = i;
+            }
+            if (overlaps.empty())
                 return -1;
             double ol = overlaps.rbegin()->first;
             if(ol <= 0)
