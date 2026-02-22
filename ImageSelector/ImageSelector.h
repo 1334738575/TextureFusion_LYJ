@@ -20,23 +20,23 @@ namespace TextureFusion_LYJ
         ImageSelector(/* args */);
         ~ImageSelector();
 
-        void selectImages(SLAM_LYJ::BaseTriMesh& _btm,
-            const std::vector<SLAM_LYJ::Pose3D>& _Tcws,
-            const std::vector<SLAM_LYJ::PinholeCamera>& _cams,
-            std::vector<SLAM_LYJ::BitFlagVec>& _imgs2fs,
+        void selectImages(COMMON_LYJ::BaseTriMesh& _btm,
+            const std::vector<COMMON_LYJ::Pose3D>& _Tcws,
+            const std::vector<COMMON_LYJ::PinholeCamera>& _cams,
+            std::vector<COMMON_LYJ::BitFlagVec>& _imgs2fs,
             std::vector<int>& _imgInds,
             ImageSelectorOption _opt);
 
     private:
-        bool project(std::vector<SLAM_LYJ::BitFlagVec>& _imgs2fs);
-        bool select(const std::vector<SLAM_LYJ::BitFlagVec>& _imgs2fs,
+        bool project(std::vector<COMMON_LYJ::BitFlagVec>& _imgs2fs);
+        bool select(const std::vector<COMMON_LYJ::BitFlagVec>& _imgs2fs,
         std::vector<int>& _imgInds);
 
 
     private:
-        SLAM_LYJ::BaseTriMesh* btm_;
-        std::vector<SLAM_LYJ::Pose3D> Tcws_;
-        std::vector<SLAM_LYJ::PinholeCamera> cams_;
+        COMMON_LYJ::BaseTriMesh* btm_;
+        std::vector<COMMON_LYJ::Pose3D> Tcws_;
+        std::vector<COMMON_LYJ::PinholeCamera> cams_;
         ImageSelectorOption opt_;
     };
     

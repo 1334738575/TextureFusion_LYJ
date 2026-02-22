@@ -8,7 +8,7 @@
 
 void testTextureFusion()
 {
-    SLAM_LYJ::Timer t;
+    COMMON_LYJ::Timer t;
     std::string pth = "D:/gsWin/gaussian-splatting/gaussian-splatting/data/mask/sparse/1";
     COMMON_LYJ::ColmapData colmapData;
     colmapData.readFromColmap(pth);
@@ -21,11 +21,11 @@ void testTextureFusion()
 
     int imgSz = colmapImages.size();
     // imgSz = 100;
-    SLAM_LYJ::SLAM_LYJ_MATH::BaseTriMesh btm;
-    std::vector<SLAM_LYJ::Pose3D> Tcws(imgSz);
-    std::vector<SLAM_LYJ::PinholeCamera> cams(imgSz);
+    COMMON_LYJ::BaseTriMesh btm;
+    std::vector<COMMON_LYJ::Pose3D> Tcws(imgSz);
+    std::vector<COMMON_LYJ::PinholeCamera> cams(imgSz);
     std::vector<COMMON_LYJ::CompressedImage> comImgs(imgSz);
-    SLAM_LYJ::readPLYMesh(btmPath, btm);
+    COMMON_LYJ::readPLYMesh(btmPath, btm);
     double readMeshTime = t.elapsed(false);
     std::cout << "read mesh time: " << readMeshTime << "ms" << std::endl;
     auto& colmapCamera = colmapCameras[0];
@@ -35,7 +35,7 @@ void testTextureFusion()
         std::string imgName = imgDir + colmapImage.imgName;
         //std::cout << imgName << std::endl;
         comImgs[i].readJPG(imgName);
-        cams[i] = SLAM_LYJ::PinholeCamera(colmapCamera.width, colmapCamera.height, colmapCamera.params);
+        cams[i] = COMMON_LYJ::PinholeCamera(colmapCamera.width, colmapCamera.height, colmapCamera.params);
         Eigen::Matrix3d Rcw = colmapImage.qcw.toRotationMatrix();
         Tcws[i].setR(Rcw);
         Tcws[i].sett(colmapImage.tcw);
@@ -47,7 +47,7 @@ void testTextureFusion()
     TextureFusion_LYJ::texture_fusion(btm, comImgs, Tcws, cams, tfOpt);
     double textueFusionTime = t.elapsed(false);
     std::cout << "texture fusion time: " << textueFusionTime << "ms" << std::endl;
-    SLAM_LYJ::writeOBJMesh("D:/tmp/tf.obj", btm);
+    COMMON_LYJ::writeOBJMesh("D:/tmp/tf.obj", btm);
     double writeObjTime = t.elapsed(false);
     std::cout << "write obj time: " << writeObjTime << "ms" << std::endl;
     return;

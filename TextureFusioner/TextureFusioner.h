@@ -28,18 +28,18 @@ namespace TextureFusion_LYJ
         TextureFusioner(/* args */);
         ~TextureFusioner();
 
-        void process(SLAM_LYJ::BaseTriMesh& _btm,
+        void process(COMMON_LYJ::BaseTriMesh& _btm,
             const std::vector<COMMON_LYJ::CompressedImage>& _imgs,
-            const std::vector<SLAM_LYJ::Pose3D>& _Tcws,
-            const std::vector<SLAM_LYJ::PinholeCamera>& _cams,
+            const std::vector<COMMON_LYJ::Pose3D>& _Tcws,
+            const std::vector<COMMON_LYJ::PinholeCamera>& _cams,
             TextureFusionOption _opt
         );
 
     private:
-        void generateBlock(SLAM_LYJ::BaseTriMesh& _btm,
+        void generateBlock(COMMON_LYJ::BaseTriMesh& _btm,
             const std::vector<const COMMON_LYJ::CompressedImage*>& _imgs,
-            const std::vector<SLAM_LYJ::Pose3D>& _Tcws,
-            const std::vector<SLAM_LYJ::PinholeCamera>& _cams,
+            const std::vector<COMMON_LYJ::Pose3D>& _Tcws,
+            const std::vector<COMMON_LYJ::PinholeCamera>& _cams,
             const std::vector<int>& _fs2Tex,
             std::vector<TextureBlock>& _texBlocks
         );

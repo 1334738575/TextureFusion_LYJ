@@ -12,18 +12,18 @@ namespace TextureFusion_LYJ
     TextureFusioner::~TextureFusioner()
     {}
 
-    void TextureFusioner::process(SLAM_LYJ::BaseTriMesh& _btm,
+    void TextureFusioner::process(COMMON_LYJ::BaseTriMesh& _btm,
         const std::vector<COMMON_LYJ::CompressedImage>& _imgs,
-        const std::vector<SLAM_LYJ::Pose3D>& _Tcws,
-        const std::vector<SLAM_LYJ::PinholeCamera>& _cams,
+        const std::vector<COMMON_LYJ::Pose3D>& _Tcws,
+        const std::vector<COMMON_LYJ::PinholeCamera>& _cams,
         TextureFusionOption _opt
     )
     {
-        SLAM_LYJ::Timer t;
+        COMMON_LYJ::Timer t;
         int fSz = _btm.getFn();
 
         //select image
-        std::vector<SLAM_LYJ::BitFlagVec> imgs2fs;
+        std::vector<COMMON_LYJ::BitFlagVec> imgs2fs;
         std::vector<int> imgInds;
         ImageSelectorOption imgSelectOpt;
         imgSelectOpt.threadNum = _opt.threadNum;
@@ -41,9 +41,9 @@ namespace TextureFusion_LYJ
         //select texture
         int selectedSz = imgInds.size();
         std::vector<const COMMON_LYJ::CompressedImage*> selectedImgs(selectedSz, nullptr);
-        std::vector<SLAM_LYJ::Pose3D> selectedTcws(selectedSz);
-        std::vector<SLAM_LYJ::PinholeCamera> selectedCams(selectedSz);
-        std::vector<SLAM_LYJ::BitFlagVec> selectedImgs2fs(selectedSz);
+        std::vector<COMMON_LYJ::Pose3D> selectedTcws(selectedSz);
+        std::vector<COMMON_LYJ::PinholeCamera> selectedCams(selectedSz);
+        std::vector<COMMON_LYJ::BitFlagVec> selectedImgs2fs(selectedSz);
         for(int i=0;i<selectedSz;++i)
         {
             selectedImgs[i] = &_imgs[imgInds[i]];
@@ -91,7 +91,7 @@ namespace TextureFusion_LYJ
         
         //obj
         std::vector<Eigen::Vector2f> uvs;
-        std::vector<SLAM_LYJ::BaseTriTextureUV> triUVs;
+        std::vector<COMMON_LYJ::BaseTriTextureUV> triUVs;
         COMMON_LYJ::CompressedImage comImg;
         //final image
         int totalW = 0;
@@ -208,10 +208,10 @@ namespace TextureFusion_LYJ
 
         
 
-    void TextureFusioner::generateBlock(SLAM_LYJ::BaseTriMesh& _btm,
+    void TextureFusioner::generateBlock(COMMON_LYJ::BaseTriMesh& _btm,
         const std::vector<const COMMON_LYJ::CompressedImage*>& _imgs,
-        const std::vector<SLAM_LYJ::Pose3D>& _Tcws,
-        const std::vector<SLAM_LYJ::PinholeCamera>& _cams,
+        const std::vector<COMMON_LYJ::Pose3D>& _Tcws,
+        const std::vector<COMMON_LYJ::PinholeCamera>& _cams,
         const std::vector<int>& _fs2Tex,
         std::vector<TextureBlock>& _texBlocks
     )

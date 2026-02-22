@@ -5,17 +5,17 @@
 namespace TextureFusion_LYJ
 {
     ProBuffer::ProBuffer() {}
-    ProBuffer::ProBuffer(const int& _w, const int& _h, SLAM_LYJ::BaseTriMesh* _btmPtr, const float& _minD, const float& _maxD, const float& _csTh, const float& _detDTh)
+    ProBuffer::ProBuffer(const int& _w, const int& _h, COMMON_LYJ::BaseTriMesh* _btmPtr, const float& _minD, const float& _maxD, const float& _csTh, const float& _detDTh)
     {
         init(_w, _h, _btmPtr, _minD, _maxD, _csTh, _detDTh);
     }
     ProBuffer::~ProBuffer(){}
-    void ProBuffer::updateTcw(const SLAM_LYJ::Pose3D& _Tcw)
+    void ProBuffer::updateTcw(const COMMON_LYJ::Pose3D& _Tcw)
     {
         _Tcw.getMatrix34f(Tcw);
     }
 
-    void ProBuffer::init(const int& _w, const int& _h, SLAM_LYJ::BaseTriMesh* _btmPtr, const float& _minD, const float& _maxD, const float& _csTh, const float& _detDTh)
+    void ProBuffer::init(const int& _w, const int& _h, COMMON_LYJ::BaseTriMesh* _btmPtr, const float& _minD, const float& _maxD, const float& _csTh, const float& _detDTh)
     {
         w = _w;
         h = _h;

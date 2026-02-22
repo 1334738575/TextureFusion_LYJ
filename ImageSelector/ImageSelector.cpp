@@ -10,10 +10,10 @@ namespace TextureFusion_LYJ
     {}
 
 
-    void ImageSelector::selectImages(SLAM_LYJ::BaseTriMesh& _btm,
-        const std::vector<SLAM_LYJ::Pose3D>& _Tcws,
-        const std::vector<SLAM_LYJ::PinholeCamera>& _cams,
-        std::vector<SLAM_LYJ::BitFlagVec>& _imgs2fs,
+    void ImageSelector::selectImages(COMMON_LYJ::BaseTriMesh& _btm,
+        const std::vector<COMMON_LYJ::Pose3D>& _Tcws,
+        const std::vector<COMMON_LYJ::PinholeCamera>& _cams,
+        std::vector<COMMON_LYJ::BitFlagVec>& _imgs2fs,
         std::vector<int>& _imgInds,
         ImageSelectorOption _opt
     )
@@ -33,7 +33,7 @@ namespace TextureFusion_LYJ
     }
 
     
-    bool ImageSelector::project(std::vector<SLAM_LYJ::BitFlagVec>& _imgs2fs)
+    bool ImageSelector::project(std::vector<COMMON_LYJ::BitFlagVec>& _imgs2fs)
     {
         //prepare
         CUDA_LYJ::ProHandle proHandle_=nullptr;
@@ -70,13 +70,13 @@ namespace TextureFusion_LYJ
         proBuffers.resize(threadNum);
         for (int i = 0; i < threadNum; ++i)
             //proBuffers[i].init(w, h, btm_);
-            proBuffers[i].init(w, h, btm_, 0.01, FLT_MAX, -0.2);
+            proBuffers[i].init(w, h, btm_, 0.01, FLT_MAX, -0.5);
 
         //project
         auto funcProject = [&](uint64_t _s, uint64_t _e, uint32_t _id) {
             for (int i = _s; i < _e; ++i)
             {
-                //SLAM_LYJ::Timer q;
+                //COMMON_LYJ::Timer q;
                 proBuffers[_id].updateTcw(Tcws_[i]);
                 CUDA_LYJ::project(proHandle_, proCaches[_id], proBuffers[_id].Tcw.data(), (float*)proBuffers[_id].depthsM.data, proBuffers[_id].fIds.data(), proBuffers[_id].allVisiblePIds.data(), proBuffers[_id].allVisibleFIds.data(), proBuffers[_id].minD, proBuffers[_id].maxD, proBuffers[_id].csTh, proBuffers[_id].detDTh);
                 //double t = q.elapsed();
@@ -95,28 +95,58 @@ namespace TextureFusion_LYJ
 
                 if(false)
                 {
-                    cv::Mat depthsShow(h, w, CV_8UC1);
-                    depthsShow.setTo(0);
-                    for (int r = 0; r < h; ++r)
-                    {
-                	    for (int c = 0; c < w; ++c)
-                	    {
-                		    float d = proBuffers[_id].depthsM.at<float>(r, c);
-                		    if (d == FLT_MAX)
-                			    continue;
-                		    int di = d * 10;
-                		    depthsShow.at<uchar>(r, c) = (uchar)di;
-                	    }
-                    }
-                    cv::pyrDown(depthsShow, depthsShow);
-                    cv::pyrDown(depthsShow, depthsShow);
-                    cv::imshow("depth", depthsShow);
-                    cv::waitKey();
-                }
+                    //cv::Mat depthsShow(h, w, CV_8UC1);
+                    //depthsShow.setTo(0);
+                    //for (int r = 0; r < h; ++r)
+                    //{
+                	   // for (int c = 0; c < w; ++c)
+                	   // {
+                		  //  float d = proBuffers[_id].depthsM.at<float>(r, c);
+                		  //  if (d == FLT_MAX)
+                			 //   continue;
+                		  //  int di = d * 10;
+                		  //  depthsShow.at<uchar>(r, c) = (uchar)di;
+                	   // }
+                    //}
+                    //cv::pyrDown(depthsShow, depthsShow);
+                    //cv::pyrDown(depthsShow, depthsShow);
+                    //cv::imshow("depth", depthsShow);
+                    //cv::waitKey();
 
+                    const auto& cs = btm_->getFCenters();
+                    const auto& ps = btm_->getVertexs();
+                    int pSz = ps.size();
+                    std::vector<Eigen::Vector3f> ps1;
+                    std::vector<Eigen::Vector3f> ps2;
+                    const auto& pValids = proBuffers[_id].allVisiblePIds;
+                    for (int j = 0; j < fSz; ++j)
+                    {
+                        const auto& vIds = faces[j].vId_;
+                        if (proBuffers[_id].allVisibleFIds[j] == 1
+                            //&& pValids[vIds[0]] == 1
+                            //&& pValids[vIds[1]] == 1
+                            //&& pValids[vIds[2]] == 1
+                            )
+                        {
+                            ps1.push_back(cs[j]);
+                        }
+                    }
+                    for (int j = 0; j < pSz; ++j)
+                    {
+                        if (pValids[j] == 1)
+                            ps2.push_back(ps[j]);
+                    }
+                    COMMON_LYJ::BaseTriMesh btmTmp1;
+                    btmTmp1.setVertexs(ps1);
+                    COMMON_LYJ::writePLYMesh("D:/tmp/tmp1.ply", btmTmp1);
+                    COMMON_LYJ::BaseTriMesh btmTmp2;
+                    btmTmp2.setVertexs(ps2);
+                    COMMON_LYJ::writePLYMesh("D:/tmp/tmp2.ply", btmTmp2);
+                }
+                continue;
             }
         };
-        SLAM_LYJ::SLAM_LYJ_MATH::ThreadPool threadPool(threadNum);
+        COMMON_LYJ::ThreadPool threadPool(threadNum);
         threadPool.processWithId(funcProject, 0, imgSz);
 
         //release
@@ -126,7 +156,7 @@ namespace TextureFusion_LYJ
     }
 
 
-    bool ImageSelector::select(const std::vector<SLAM_LYJ::BitFlagVec>& _imgs2fs,
+    bool ImageSelector::select(const std::vector<COMMON_LYJ::BitFlagVec>& _imgs2fs,
         std::vector<int>& _imgInds)
     {
         int imgSz = Tcws_.size();
@@ -134,7 +164,7 @@ namespace TextureFusion_LYJ
 
         std::map<double, int> overlaps;
         std::vector<double> overlapsV(imgSz, 0);
-        SLAM_LYJ::BitFlagVec fVisible(fSz);
+        COMMON_LYJ::BitFlagVec fVisible(fSz);
         int dSz = fVisible.size();
         dSz >>= 3;
         dSz += 1;
@@ -163,7 +193,7 @@ namespace TextureFusion_LYJ
 
             if (opt_.threadNum != 1)
             {
-                SLAM_LYJ::SLAM_LYJ_MATH::ThreadPool threadPool(opt_.threadNum);
+                COMMON_LYJ::ThreadPool threadPool(opt_.threadNum);
                 threadPool.processWithId(functtt, 0, imgSz);
             }
             else

@@ -11,11 +11,11 @@ namespace TextureFusion_LYJ
     {}
 
     void TextureSelector::selectTexture(
-        SLAM_LYJ::BaseTriMesh& _btm,
+        COMMON_LYJ::BaseTriMesh& _btm,
         const std::vector<const COMMON_LYJ::CompressedImage*>& _imgs,
-        const std::vector<SLAM_LYJ::Pose3D>& _Tcws,
-        const std::vector<SLAM_LYJ::PinholeCamera>& _cams,
-        const std::vector<SLAM_LYJ::BitFlagVec>& _imgs2fs,
+        const std::vector<COMMON_LYJ::Pose3D>& _Tcws,
+        const std::vector<COMMON_LYJ::PinholeCamera>& _cams,
+        const std::vector<COMMON_LYJ::BitFlagVec>& _imgs2fs,
         std::vector<int>& _fs2Tex,
         TextureSelectorOption _opt
     )
@@ -33,7 +33,7 @@ namespace TextureFusion_LYJ
         _fs2Tex.assign(fSz, -1);
         std::map<double, int> overlaps;
         std::vector<double> overlapsV(imgSz, 0);
-        SLAM_LYJ::BitFlagVec fVisible(fSz);
+        COMMON_LYJ::BitFlagVec fVisible(fSz);
         std::set<int> selectedImgInds;
         auto functtt = [&](uint64_t _s, uint64_t _e, uint32_t _id)
             {
@@ -59,7 +59,7 @@ namespace TextureFusion_LYJ
 
             if (opt_.threadNum != 1)
             {
-                SLAM_LYJ::SLAM_LYJ_MATH::ThreadPool threadPool(opt_.threadNum);
+                COMMON_LYJ::ThreadPool threadPool(opt_.threadNum);
                 threadPool.processWithId(functtt, 0, imgSz);
             }
             else

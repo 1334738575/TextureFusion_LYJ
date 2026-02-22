@@ -17,11 +17,11 @@ namespace TextureFusion_LYJ
     {
     private:
         /* data */
-        SLAM_LYJ::BaseTriMesh* btm_;
+        COMMON_LYJ::BaseTriMesh* btm_;
         std::vector<const COMMON_LYJ::CompressedImage*> imgs_;
-        std::vector<SLAM_LYJ::Pose3D> Tcws_;
-        std::vector<SLAM_LYJ::PinholeCamera> cams_;
-        std::vector<SLAM_LYJ::BitFlagVec> imgs2fs_;
+        std::vector<COMMON_LYJ::Pose3D> Tcws_;
+        std::vector<COMMON_LYJ::PinholeCamera> cams_;
+        std::vector<COMMON_LYJ::BitFlagVec> imgs2fs_;
         TextureSelectorOption opt_;
 
     public:
@@ -29,11 +29,11 @@ namespace TextureFusion_LYJ
         ~TextureSelector();
 
         void selectTexture(
-            SLAM_LYJ::BaseTriMesh& _btm,
+            COMMON_LYJ::BaseTriMesh& _btm,
             const std::vector<const COMMON_LYJ::CompressedImage*>& _imgs,
-            const std::vector<SLAM_LYJ::Pose3D>& _Tcws,
-            const std::vector<SLAM_LYJ::PinholeCamera>& _cams,
-            const std::vector<SLAM_LYJ::BitFlagVec>& _imgs2fs,
+            const std::vector<COMMON_LYJ::Pose3D>& _Tcws,
+            const std::vector<COMMON_LYJ::PinholeCamera>& _cams,
+            const std::vector<COMMON_LYJ::BitFlagVec>& _imgs2fs,
             std::vector<int>& _fs2Tex,
             TextureSelectorOption _opt
         );

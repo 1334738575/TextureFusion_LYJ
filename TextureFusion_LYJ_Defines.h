@@ -27,15 +27,15 @@ namespace TextureFusion_LYJ
     public:
 
         ProBuffer();
-        ProBuffer(const int& _w, const int& _h, SLAM_LYJ::BaseTriMesh* _btmPtr, const float& _minD=0.01f, const float& _maxD=FLT_MAX, const float& _csTh=0.5f, const float& _detDTh=0.01f);
+        ProBuffer(const int& _w, const int& _h, COMMON_LYJ::BaseTriMesh* _btmPtr, const float& _minD=0.01f, const float& _maxD=FLT_MAX, const float& _csTh=0.5f, const float& _detDTh=0.01f);
         ~ProBuffer();
-        void updateTcw(const SLAM_LYJ::Pose3D& _Tcw);
+        void updateTcw(const COMMON_LYJ::Pose3D& _Tcw);
 
-        void init(const int& _w, const int& _h, SLAM_LYJ::BaseTriMesh* _btmPtr, const float& _minD = 0.01f, const float& _maxD = FLT_MAX, const float& _csTh = 0.5f, const float& _detDTh = 0.01f);
+        void init(const int& _w, const int& _h, COMMON_LYJ::BaseTriMesh* _btmPtr, const float& _minD = 0.01f, const float& _maxD = FLT_MAX, const float& _csTh = 0.5f, const float& _detDTh = 0.01f);
 
         int w = 0;
         int h = 0;
-        SLAM_LYJ::BaseTriMesh* btmPtr = nullptr;
+        COMMON_LYJ::BaseTriMesh* btmPtr = nullptr;
         Eigen::Matrix<float, 3, 4> Tcw;
         cv::Mat depthsM;
         std::vector<uint> fIds;
