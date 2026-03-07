@@ -27,6 +27,8 @@ namespace TextureFusion_LYJ
         std::vector<int> imgInds;
         ImageSelectorOption imgSelectOpt;
         imgSelectOpt.threadNum = _opt.threadNum;
+        imgSelectOpt.useCUDA = _opt.useCUDA;
+        imgSelectOpt.useVulkan = _opt.useVulkan;
         ImageSelector imgSelector;
         imgSelector.selectImages(_btm, _Tcws, _cams, imgs2fs, imgInds, imgSelectOpt);
         if(imgs2fs.empty() || imgInds.empty())

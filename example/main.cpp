@@ -9,15 +9,20 @@
 void testTextureFusion()
 {
     COMMON_LYJ::Timer t;
-    std::string pth = "D:/gsWin/gaussian-splatting/gaussian-splatting/data/mask/sparse/1";
+    //std::string pth = "D:/gsWin/gaussian-splatting/gaussian-splatting/data/mask/sparse/1";
+    //std::string imgDir = "D:/gsWin/gaussian-splatting/gaussian-splatting/data/mask/images/";
+    //std::string btmPath = "D:/SLAM_LYJ_Packages/SLAM_LYJ_qt/tmp/fuse_unbounded_post.ply";
+    std::string basePath = "D:/tmp/colmapData/mask/";
+    std::string pth = basePath + "/dense/sparse/0/";
+    std::string imgDir = basePath + "/dense/images/";
+    std::string btmPath = basePath + "/3DGS/train/ours_30000/mesh.ply";
+    std::string outFile = basePath + "tf.obj";
     COMMON_LYJ::ColmapData colmapData;
     colmapData.readFromColmap(pth);
     double readColmapTime = t.elapsed(false);
     std::cout << "read colmap time: " << readColmapTime << "ms" << std::endl;
     std::vector<COMMON_LYJ::ColmapImage>& colmapImages = colmapData.images_;
     std::vector<COMMON_LYJ::ColmapCamera>& colmapCameras = colmapData.cameras_;
-    std::string imgDir = "D:/gsWin/gaussian-splatting/gaussian-splatting/data/mask/images/";
-    std::string btmPath = "D:/SLAM_LYJ_Packages/SLAM_LYJ_qt/tmp/fuse_unbounded_post.ply";
 
     int imgSz = colmapImages.size();
     // imgSz = 100;
@@ -44,10 +49,12 @@ void testTextureFusion()
     std::cout << "read image time: " << readImageTime << "ms" << std::endl;
     TextureFusion_LYJ::TextureFusionOption tfOpt;
     //tfOpt.threadNum = 1;//common_lyj，里面有bug，线程数多于任务数会死循环TODO
+    tfOpt.useCUDA = false;
+    tfOpt.useVulkan = true;
     TextureFusion_LYJ::texture_fusion(btm, comImgs, Tcws, cams, tfOpt);
     double textueFusionTime = t.elapsed(false);
     std::cout << "texture fusion time: " << textueFusionTime << "ms" << std::endl;
-    COMMON_LYJ::writeOBJMesh("D:/tmp/tf.obj", btm);
+    COMMON_LYJ::writeOBJMesh(outFile, btm);
     double writeObjTime = t.elapsed(false);
     std::cout << "write obj time: " << writeObjTime << "ms" << std::endl;
     return;

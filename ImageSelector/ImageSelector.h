@@ -2,7 +2,6 @@
 #define IMAGE_SELECTOR_LYJ_H
 
 #include "TextureFusion_LYJ_Defines.h"
-#include <CUDAInclude.h>
 
 namespace TextureFusion_LYJ
 {
@@ -10,6 +9,8 @@ namespace TextureFusion_LYJ
     {
         /* data */
         int threadNum = -1;
+        bool useCUDA = true;
+        bool useVulkan = false;
     };
     
     class ImageSelector

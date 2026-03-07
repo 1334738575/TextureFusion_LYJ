@@ -51,6 +51,8 @@ namespace TextureFusion_LYJ
     struct TextureFusionOption
     {
         int threadNum = -1;
+        bool useCUDA = true;
+        bool useVulkan = false;
     };
 }
 
